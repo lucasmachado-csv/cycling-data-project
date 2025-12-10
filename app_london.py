@@ -82,6 +82,37 @@ app.layout = html.Div(
                     ],
                     style={"minWidth": "260px"},
                 ),
+                html.Div(
+                    [
+                        html.Label(
+                            "Bike Model:",
+                            style={
+                                "fontWeight": "bold",
+                                "marginBottom": "6px",
+                                "display": "block",
+                            },
+                        ),
+                        dcc.Dropdown(
+                            id="bike-model-dropdown",
+                            options=[
+                                {"label": "All", "value": "All"},
+                                {"label": "Classic", "value": "Classic"},
+                                {"label": "E-Bike", "value": "E-Bike"},
+                                {"label": "Unknown", "value": "Unknown"},
+                            ],
+                            value="All",
+                            clearable=False,
+                            style={
+                                "width": "240px",
+                                "height": "44px",
+                                "padding": "6px 10px",
+                                "border": "1px solid #ccc",
+                                "borderRadius": "5px",
+                            },
+                        ),
+                    ],
+                    style={"minWidth": "260px"},
+                ),
             ],
             style={
                 "padding": "0 24px 12px 24px",
@@ -140,7 +171,7 @@ app.layout = html.Div(
                             },
                         ),
                     ],
-                    style={"padding": "0 40px", "marginBottom": "40px"},
+                    style={"padding": "0 40px", "marginBottom": "140px"},
                 ),
                 # Row 3: Stations
                 html.Div(
@@ -172,7 +203,7 @@ app.layout = html.Div(
                             },
                         ),
                     ],
-                    style={"padding": "0 40px", "marginBottom": "40px"},
+                    style={"padding": "0 40px", "marginBottom": "20px"},
                 ),
                 # Row 4: Day & Hour
                 html.Div(
@@ -210,7 +241,7 @@ app.layout = html.Div(
                             },
                         ),
                     ],
-                    style={"padding": "0 40px"},
+                    style={"padding": "0 40px", "marginBottom": "140px"},
                 ),
                 # Row 5: Top Routes
                 html.Div(
@@ -251,12 +282,23 @@ app.layout = html.Div(
     [
         Input("date-picker-range", "start_date"),
         Input("date-picker-range", "end_date"),
+        Input("bike-model-dropdown", "value"),
     ],
 )
-def update_charts(start_date, end_date):
+def update_charts(start_date, end_date, bike_model):
     if not start_date or not end_date:
         empty = px.line(title="Select a date range")
         return (empty,) * 8
+
+    # Build bike_model filter
+    if bike_model == "Classic":
+        bm_filter = "AND bike_model = 'CLASSIC'"
+    elif bike_model == "E-Bike":
+        bm_filter = "AND bike_model = 'PBSC_EBIKE'"
+    elif bike_model == "Unknown":
+        bm_filter = "AND bike_model IS NULL"
+    else:
+        bm_filter = ""
 
     con = get_db_connection()
     try:
@@ -269,6 +311,7 @@ def update_charts(start_date, end_date):
                 sum(duration_seconds) / 86400.0 AS total_duration_days
             FROM london_bike_data
             WHERE start_date BETWEEN '{start_date}' AND '{end_date}'
+            {bm_filter}
             GROUP BY 1
             ORDER BY 1
         """
@@ -279,6 +322,7 @@ def update_charts(start_date, end_date):
             SELECT start_station_name, COUNT(*) AS rides
             FROM london_bike_data
             WHERE start_date BETWEEN '{start_date}' AND '{end_date}'
+              {bm_filter}
               AND start_station_name IS NOT NULL
             GROUP BY 1
             ORDER BY 2 DESC
@@ -291,6 +335,7 @@ def update_charts(start_date, end_date):
             SELECT end_station_name, COUNT(*) AS rides
             FROM london_bike_data
             WHERE start_date BETWEEN '{start_date}' AND '{end_date}'
+              {bm_filter}
               AND end_station_name IS NOT NULL
             GROUP BY 1
             ORDER BY 2 DESC
@@ -306,6 +351,7 @@ def update_charts(start_date, end_date):
                 COUNT(*) AS rides
             FROM london_bike_data
             WHERE start_date BETWEEN '{start_date}' AND '{end_date}'
+            {bm_filter}
             GROUP BY 1, 2
             ORDER BY 2
         """
@@ -318,6 +364,7 @@ def update_charts(start_date, end_date):
                 COUNT(*) AS rides
             FROM london_bike_data
             WHERE start_date BETWEEN '{start_date}' AND '{end_date}'
+            {bm_filter}
             GROUP BY 1
             ORDER BY 1
         """
@@ -330,6 +377,7 @@ def update_charts(start_date, end_date):
                 COUNT(*) AS rides
             FROM london_bike_data
             WHERE start_date BETWEEN '{start_date}' AND '{end_date}'
+              {bm_filter}
               AND start_station_name IS NOT NULL
               AND end_station_name IS NOT NULL
             GROUP BY 1

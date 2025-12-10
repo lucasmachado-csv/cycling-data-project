@@ -106,14 +106,14 @@ app.layout = html.Div(
                         dcc.Graph(id="avg-duration-chart"),
                         dcc.Graph(id="total-duration-chart"),
                     ],
-                    style={"padding": "0 32px"},
+                    style={"padding": "0 32px 48px 32px"},
                 ),
                 html.Div(
                     [
                         html.Div([dcc.Graph(id="dow-chart")], style={"width": "48%", "display": "inline-block", "marginRight": "2%"}),
                         html.Div([dcc.Graph(id="hour-chart")], style={"width": "48%", "display": "inline-block"}),
                     ],
-                    style={"padding": "0 32px 24px 32px"},
+                    style={"padding": "0 32px 48px 32px"},
                 ),
             ],
         ),

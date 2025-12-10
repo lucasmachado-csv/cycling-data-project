@@ -104,8 +104,6 @@ app.layout = html.Div(
                             id="user-type-dropdown",
                             options=[
                                 {"label": "All", "value": "All"},
-                                {"label": "Subscriber", "value": "subscriber"},
-                                {"label": "Customer", "value": "customer"},
                                 {"label": "Member", "value": "member"},
                                 {"label": "Casual", "value": "casual"},
                             ],
@@ -184,7 +182,7 @@ app.layout = html.Div(
                             },
                         ),
                     ],
-                    style={"padding": "0 40px", "marginBottom": "40px"},
+                    style={"padding": "0 40px", "marginBottom": "140px"},
                 ),
                 # Row 3: Stations
                 html.Div(
@@ -220,7 +218,7 @@ app.layout = html.Div(
                             },
                         ),
                     ],
-                    style={"padding": "0 40px", "marginBottom": "40px"},
+                    style={"padding": "0 40px", "marginBottom": "20px"},
                 ),
                 # Row 4: Day & Hour
                 html.Div(
@@ -258,7 +256,7 @@ app.layout = html.Div(
                             },
                         ),
                     ],
-                    style={"padding": "0 40px"},
+                    style={"padding": "0 40px", "marginBottom": "140px"},
                 ),
             # Row 5: Geospatial Heatmap (Full Width)
             html.Div(
@@ -444,7 +442,7 @@ def update_charts(start_date, end_date, user_type):
 
     if df_ts.empty:
         empty = px.line(title="No data found")
-        return (empty,) * 8
+        return (empty,) * 9
 
     template = "plotly_white"
 
