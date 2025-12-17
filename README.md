@@ -80,3 +80,24 @@ kill <PID>
 - NYC durations are computed as `end_time - start_time` in seconds; London uses `duration_seconds` provided in the data.
 - Top routes are capped at 10 and require non-null start/end station names.
 
+## Chatbot (NL→SQL) for DuckDB
+The `chatbot_service.py` FastAPI app turns natural language questions into safe, read-only SQL against `cycling.duckdb`.
+
+Run locally:
+```bash
+export DUCKDB_PATH=/Users/lucas/Documents/BAM/cycling.duckdb
+export OPENAI_API_KEY=sk-...
+export CHATBOT_OPENAI_MODEL=gpt-4.1-mini
+uvicorn chatbot_service:app --reload --port 8000
+```
+You can also place these values in a `.env` file in the project root (e.g., `OPENAI_API_KEY=...`); the service will load them automatically if `python-dotenv` is installed.
+
+Endpoint:
+- `POST /ask` with JSON body `{"question": "...", "include_plot": false, "max_rows": 50}`
+- Returns: `answer` (summary), `sql` (generated), `data_preview` (rows), `columns`, optional `plot` (Plotly fig dict).
+
+Safety/guardrails:
+- Read-only DuckDB connection.
+- Allowed tables only: `london_bike_data`, `nyc_biking_data`, `joint_bike_data`.
+- Blocks DDL/DML and multiple statements; requires `LIMIT` on non-aggregates.
+
